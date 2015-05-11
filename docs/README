@@ -1,0 +1,681 @@
+README VSAUDIT - 2015.1
+-----------------------
+
+Description
+-----------------------------------------------------------------------------------------------------------------------------
+
+    The vsaudit is an opensource framework to perform attacks to general voip services. 
+    It allows to scan the whole network or single host engaging in the information gathering 
+    phase, besides it is able to search for most known vulnerabilities on the found 
+    alive hosts and then try to exploit them.
+
+
+
+Let's go..
+-----------------------------------------------------------------------------------------------------------------------------
+
+    Install Dependencies
+
+        To start using vsaudit you must install the 'bundler' package that will be used to install
+        the requireds gem dependencies through the Gemfile.
+
+        Download directly from website: 
+
+            http://bundler.io/
+        
+        Or install with 'gem' (ruby package manager) with: 
+
+            deftcode ~ $ gem install bundler
+
+        After that the installation has been completed, run (in the directory where is located vsaudit):
+
+            deftcode vsaudit $ bundle
+
+        Now you can start vsaudit with:
+
+            deftcode vsaudit $ ruby vsaudit.rb
+
+
+    Environment commands
+
+        - Display the available options that can be set
+        - List the environment variables
+        - Get the value of environment variable
+        - Set or change the environment variables
+
+
+    Audit commands
+
+        - Check mistakes in the local configuration files
+        - Scan a local o remote network
+        - Enumerate the extensions
+        - Bruteforce extensions
+        - Get the live network traffic
+        - Intercept the network traffic by custom bpf
+
+
+    Informations commands
+
+        - Get informations about modules or address
+        - Show the report list
+        - Show the extensions list
+
+
+    Global commands
+
+        - Display the help message
+        - Quit from the framework
+
+
+
+Environment commands:
+-----------------------------------------------------------------------------------------------------------------------------
+
+    - Display the available options that can be set
+
+        vsaudit > help environment
+
+        + ENVIRONMENT COMMANDS:
+
+            Command     Args            Description
+            s|set       [key] [value]   Set an environment variable
+            g|get       [key]           Get an environment variable value/s
+            e|env       -               Display all environment variables
+
+
+        + ENVIRONMENT VARIABLES:
+
+            Option      Value           Description
+            PORT        [*r|5060]       Set port range (default: 5060)
+            TIMEOUT     [1|0.5]         Set scanner timeout connect()/recv() (default: 1 seconds)
+            THREADS     [1|200]         Set scanner threads limit (default: 50 concurrency)
+            TRANSPORT   [udp|tcp]       Set transport for enumeration/bruteforce (default: udp)
+            IFACE       [eth0|wlan1]    Indicate which interface use to capture network traffic (default: eth0)
+            DUMPHEX     [on|off]        Dump network traffic in hexadecimal (default: off)
+            DUMPCLEAN   [on|off]        Clear network traffic skipping unicode frame bytes (default: on)
+
+            * r: range  ex. '0-65535'
+
+
+    - List the environment variables
+
+        vsaudit > env
+        -> DUMPCLEAN:   on
+        -> DUMPHEX:     off
+        -> IFACE:       any
+        -> PORT:        5060
+        -> THREADS:     50
+        -> TIMEOUT:     1
+        -> TRANSPORT:   udp
+
+
+    - Get the value of environment variable
+
+        vsaudit > get port
+        -> PORT: 5060
+
+
+    - Set or change the environment variables
+
+        vsaudit > set port 0-65535
+        + setting key: PORT value: 0-65535
+
+
+
+Audit commands:
+-----------------------------------------------------------------------------------------------------------------------------
+
+    - Check mistakes in the local configuration files
+
+        In 'modules/asterisk.rb' you can set the custom configuration files that you want vsaudit to inspect
+        and search for common mistakes through a regular expressions patterns. 
+        You could add or remove configuration files to array named '@@services_files' with the regex pattern.
+
+        Example:
+
+            @@services_files = [
+                # file to audit.                    # unsecure parameter regex.
+                '/etc/asterisk/sip.conf'            => /^(allow=|allowguest)/,
+                '/etc/asterisk/extensions.conf'     => /^(allow)/
+            ]
+
+            In the example above you can set the filename with absolute path you want to inspect and then you
+            must set the regular expression to match in file, in this case you instruct vsaudit to grep the
+            'sip.conf' and search for configuration option that start with 'allow=' or 'allowguest' and the
+            'extensions.conf' for just 'allow=' options.
+
+
+        How to use it:
+
+            vsaudit > fcheck
+
+                Checking filename:  /etc/asterisk/sip.conf
+                regexp to matchs:   (?-mix:^(allow=|allowguest))
+
+                Line 3: un-safe parameter found 'allowguest=no'
+                Line 9: un-safe parameter found 'allow=ulaw'
+
+                Checking filename:  /etc/asterisk/extensions.conf
+                regexp to matchs:   (?-mix:^(allow))
+
+
+    - Scan a local o remote network
+
+        You can perform a port-scan with TCP/UDP transport by matching vulnerables services with a custom
+        regular expression set in the 'modules/asterisk.rb' module.
+        In the module you can see the '@@services_udp_detect_regex' variable that allows you to set the
+        regular expression that will be used next time to match the service banner.
+        
+        Note: these things are the same for TCP transport, but you must use the '@@services_tcp_detect_regex'
+        variable for regular expressions settings.
+
+        Example:
+
+            @@services_udp_detect_regex = [
+                :identifiers    => /(Server:|User-Agent:)/,
+                :methods        => /Allow:/
+            ]
+
+            In the example above you can set the 'identifiers' and 'methods', the first is used to match
+            the service banner, instead the last is used to match the available public methods enabled in
+            the service (this is usually referred to Asterisk daemon).
+
+            While port-scanning, vsaudit grep the service response and search for 'identifiers' regular
+            expression, then it checks for allowed methods.
+
+
+        How to use it: 
+
+            1) First set port range, this can be a single port or ports range (default: 5060):
+
+                vsaudit > set port 5060                 # Scans single port
+                or
+                vsaudit > set port 5000-8000            # Scans from port 5000 to 8000
+
+
+            2) Optionally you can set the transport (default is set to udp)
+
+                vsaudit > set transport tcp             # Sets transport to tcp
+
+
+            3) Optionally you can set the timeout value for connect() and recv() calls (default: 0.5):
+
+                vsaudit > set timeout 1                 # Sets timeout to 1 seconds
+                or
+                vsaudit > set timeout 0.5               # Sets timeout to 0.5 seconds (500 milliseconds)
+
+
+            4) Do the network scan:
+
+                vsaudit > scan 127.0.0.1
+
+                starting scan on address:   127.0.0.1
+                using ports-range:          5060-5060 (udp)
+
+                + 127.0.0.1        open port udp/5060            Asterisk PBX 11.7.0~dfsg-1ubuntu1
+
+
+                ----------------------------------------------------------------------------------------------------------------------
+                | Device           | Port      | Banner                                   | Allows                                   |
+                ----------------------------------------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | Asterisk PBX 11.7.0~dfsg-1ubuntu1        | INVITE, ACK, CANCEL, OPTIONS, BYE        |
+                ----------------------------------------------------------------------------------------------------------------------
+                + Consider to use: i [device] to retrieve full device informations
+
+
+    - Enumerate the extensions
+
+        You can starts enumerating the extensions with explicit set a custom address or 
+        using the previous addresses found through port-scanner, then you can specify the extensions range
+        or the file that can be used to enumerate it.
+
+
+        How to use it:
+
+        1) Enumerating using single target and custom ranges:
+
+            vsaudit > en 7000-8000 127.0.0.1
+
+                starting enumeration on address:    127.0.0.1
+                using ports-range:                  5060-5060 (udp)
+
+                + 127.0.0.1:5060         extension '7002' enabled   [no auth]
+                + 127.0.0.1:5060         extension '7003' enabled   [no auth]
+                > testing extension: 8000                  
+
+                ------------------------------------------------------------------------------------
+                | Device           | Port      | Extension           | Auth | Password             |
+                ------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | 7002                | no   | -                    |
+                ------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | 7003                | no   | -                    |
+                ------------------------------------------------------------------------------------
+
+
+        2) Enumerating using previous generated report list and custom range:
+
+            vsaudit > r
+
+                ----------------------------------------------------------------------------------------------------------------------
+                | Device           | Port      | Motd                                     | Allows                                   |
+                ----------------------------------------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | Asterisk PBX 11.7.0~dfsg-1ubuntu1        | INVITE, ACK, CANCEL, OPTIONS, BYE        |
+                ----------------------------------------------------------------------------------------------------------------------
+
+            vsaudit > en 7000-8000
+
+                starting enumeration on address:    127.0.0.1
+                using single port:                  5060 (udp)
+
+                + 127.0.0.1:5060         extension '7002' enabled   [no auth]
+                + 127.0.0.1:5060         extension '7003' enabled   [no auth]
+                > testing extension: 8000
+
+                ------------------------------------------------------------------------------------
+                | Device           | Port      | Extension           | Auth | Password             |
+                ------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | 7002                | no   | -                    |
+                ------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | 7003                | no   | -                    |
+                ------------------------------------------------------------------------------------
+
+
+        3) Enumerating using single target and dictionary extensions list:
+
+            vsaudit > enum ext-list 127.0.0.1
+
+                starting enumeration on address:    127.0.0.1
+                using ports-range:                  5060-5060 (udp)
+
+                + 127.0.0.1:5060         extension '7002' enabled   [no auth]
+                > testing extension: 3001                  
+
+                ------------------------------------------------------------------------------------
+                | Device           | Port      | Extension           | Auth | Password             |
+                ------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | 7001                | yes  | 123                  |
+                ------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | 7002                | no   | -                    |
+                ------------------------------------------------------------------------------------
+
+            Note: you can write your own dictionary lists and locate them in the directory 'list/'.
+
+
+        4) Enumerating using single target and dictionary extensions list with password:
+
+            You can append a password to an extension name such as:
+
+                ...
+                7000
+                7001:~123456
+                7002
+                7003:~examplepasswd
+                ...
+
+            So, when you start enumerating address with dictionary list, if vsaudit found the password on the right of extension
+            separated by the separator ':~' It will automatically tries the authentication with the md5 challenge.
+
+
+    - Bruteforce extensions
+
+        Here you can try to crack extensions with a password list.
+
+
+        How to use it:
+
+            vsaudit > bf ext-list psw-list 127.0.0.1
+
+                starting bruteforce on address:     127.0.0.1
+                using ports-range:                  5060-5060 (udp)
+
+                + 127.0.0.1:5060         extension 7001             password: 123                   
+                + 127.0.0.1:5060         extension 7002             password: -                      
+                > testing authentication: 3001             : manuelito             
+                ------------------------------------------------------------------------------------
+                | Device           | Port      | Extension           | Auth | Password             |
+                ------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | 7001                | yes  | 123                  |
+                ------------------------------------------------------------------------------------
+                | 127.0.0.1        | 5060/udp  | 7002                | no   | -                    |
+                ------------------------------------------------------------------------------------
+
+            or
+
+            vsaudit > bf 7000-7003 psw-list 0.0.0.0
+
+                starting bruteforce on address:     0.0.0.0
+                using ports-range:                  5060-5060 (udp)
+
+                + 0.0.0.0:5060           extension 7001             password: 123                   
+                + 0.0.0.0:5060           extension 7002             password: -                      
+                + 0.0.0.0:5060           extension 7003             password: -                      
+
+                ------------------------------------------------------------------------------------
+                | Device           | Port      | Extension           | Auth | Password             |
+                ------------------------------------------------------------------------------------
+                | 0.0.0.0          | 5060/udp  | 7001                | yes  | 123                  |
+                ------------------------------------------------------------------------------------
+                | 0.0.0.0          | 5060/udp  | 7002                | no   | -                    |
+                ------------------------------------------------------------------------------------
+                | 0.0.0.0          | 5060/udp  | 7003                | no   | -                    |
+                ------------------------------------------------------------------------------------
+
+
+    - Get the live network traffic
+
+        Here you can monitor live network traffic using standard bpf filter.
+
+
+        How to use it:
+
+        1) Get tcp or udp live network traffic:
+
+            vsaudit > live
+
+                capturing local network traffic
+                using barkeley packet filter:   udp
+
+                Packet length: 631, Time: 2015-04-11 09:45:43
+                ---------------------------------------------
+                SIP/2.0 401 Unauthorized
+                Via: SIP/2.0/UDP 192.168.1.196:5060;branch=z9hG4bKf083b96c-8cde-e411-85f6-000c29bac856;received=192.168.1.196;rport=5060
+                From: "pentester" <sip:7001@192.168.1.100>;tag=aa7fb86c-8cde-e411-85f6-000c29bac856
+                To: <sip:192.168.1.100>;tag=as54658d12
+                Call-ID: 0683b86c-8cde-e411-85f6-000c29bac856@deftcode
+                CSeq: 1 INVITE
+                Server: Asterisk PBX 11.7.0~dfsg-1ubuntu1
+                Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+                Supported: replaces
+                WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="39e13888"
+                Content-Length: 0
+
+
+        2) Get tcp or udp live network traffic filtered by ip address:
+
+            vsaudit > live [addr]
+
+
+        Note: if you want to intercept tcp traffic, you need to set environment variable to 'tcp' like: 'set transport tcp'
+
+
+    - Intercept the network traffic by custom bpf
+
+        Here you can monitor traffic by using a custom barkeley packet filter syntax.
+
+
+        How to use it:
+
+        1) Get all udp network traffic filtered by destination port 5060:
+
+            vsaudit > in udp dst port 5060
+
+                capturing local network traffic
+                using barkeley packet filter:   udp dst port 5060
+
+                Packet length: 631, Time: 2015-04-11 09:44:02
+                ---------------------------------------------
+                SIP/2.0 401 Unauthorized
+                Via: SIP/2.0/UDP 192.168.1.196:5060;branch=z9hG4bK5a7cf230-8cde-e411-85f6-000c29bac856;received=192.168.1.196;rport=5060
+                From: "pentester" <sip:7001@192.168.1.100>;tag=aeb5f130-8cde-e411-85f6-000c29bac856
+                To: <sip:192.168.1.100>;tag=as159ad5f0
+                Call-ID: e8b7f130-8cde-e411-85f6-000c29bac856@deftcode
+                CSeq: 1 INVITE
+                Server: Asterisk PBX 11.7.0~dfsg-1ubuntu1
+                Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+                Supported: replaces
+                WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="6e46f041"
+                Content-Length: 0
+
+
+        2) Intercept the sip md5 challenge response hash (WWW-Authenticate):
+
+            You can try to intercept the md5 challenge during the sip handshake authentication. 
+
+            Here is how handshake was performed:
+
+                md5_a = md5(username : realm : password)        # Encode first string.
+                md5_b = md5(method : request_uri)               # Encode last string.
+
+                md5_f = md5(md5_a : nonce : md5_b)              # Here is the encoded 'response' hash.
+
+
+            How to use it:
+
+            vsaudit > in password
+
+                capturing local network traffic
+                using barkeley packet filter:   udp or tcp
+
+                2015-04-11 19:21:26: Handshake request data
+                -------------------------------------------
+                WWW-Authenticate: Digest algorithm=MD5
+                realm="asterisk"
+                nonce="1edf8169"
+
+                2015-04-11 19:21:26: Handshake request data
+                -------------------------------------------
+                WWW-Authenticate: Digest algorithm=MD5
+                realm="asterisk"
+                nonce="1edf8169"
+
+                2015-04-11 19:21:26: Found an md5 challenge
+                -------------------------------------------
+                Authorization: Digest username="7001"
+                realm="asterisk"
+                nonce="1edf8169"
+                uri="sip:192.168.1.100"
+                algorithm=MD5
+                response="ad711f90b89907efccafcb31db11e034"
+
+
+        3) Record the live network traffic stream to file
+
+            vsaudit > in udp portrange 10000-20000 record
+
+            The traffic will be recorded to ./raw/data.raw and action stay in background.
+
+
+        4) Daemonize the intercept process in a session
+
+            vsaudit > in udp dst port 5060 detach
+
+
+        5) Attach to an opened session
+
+            First show the active sessions:
+
+                vsaudit > session list
+
+                - session id: 0     intercept detached in progress
+
+                + Use session [session_id] to attach to process
+
+            Use the session [session-id] to attach it, then press CTRL+C to close the descriptor and session:
+
+                vsaudit > session 0
+
+                - session id: 0     intercept detached in progress
+                + Packet Capture stopped by interrupt signal.
+                0 packets received by filter
+                0 packets dropped by kernel
+
+
+
+Informations commands:
+-----------------------------------------------------------------------------------------------------------------------------
+
+    - Get informations about modules or address
+
+        Here you can retrieve the informations about a custom module or an address located in the report list.
+
+
+        How to use it:
+
+        1) Get module informations:
+
+            vsaudit > info asterisk
+
+            Module 'asterisk' found:
+
+            + Name:         Asterisk auditing module v. 2015.1
+            + Author:       Federico Fazzi <eurialo@deftcode.ninja>
+
+            + Description:  This is a module that manages the asterisk service like
+                            service identification and extensions enumeration.
+
+
+        2) Get address informations:
+
+            vsaudit > info 127.0.0.1
+
+            Address '127.0.0.1' found:
+
+            + Device:   127.0.0.1
+            + Port:     5060/udp
+
+            + Motd:     Asterisk PBX 11.7.0~dfsg-1ubuntu1
+            + Allows:   INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+
+            + Extensions:
+
+            ------------------------------------------------------------------------------------
+            | Device           | Port      | Extension           | Auth | Password             |
+            ------------------------------------------------------------------------------------
+            | 127.0.0.1        | 5060/udp  | 7002                | no   | -                    |
+            ------------------------------------------------------------------------------------
+            | 127.0.0.1        | 5060/udp  | 7003                | no   | -                    |
+            ------------------------------------------------------------------------------------
+
+
+    - Show the report list
+
+            vsaudit > report
+
+            ----------------------------------------------------------------------------------------------------------------------
+            | Device           | Port      | Banner                                   | Allows                                   |
+            ----------------------------------------------------------------------------------------------------------------------
+            | 127.0.0.1        | 5060/udp  | Asterisk PBX 11.7.0~dfsg-1ubuntu1        | INVITE, ACK, CANCEL, OPTIONS, BYE        |
+            ----------------------------------------------------------------------------------------------------------------------
+            + Consider to use: i [device] to retrieve full device informations
+
+
+    - Show the extensions list
+
+            vsaudit > exts
+
+            ------------------------------------------------------------------------------------
+            | Device           | Port      | Extension           | Auth | Password             |
+            ------------------------------------------------------------------------------------
+            | 127.0.0.1        | 5060/udp  | 7003                | no   | -                    |
+            ------------------------------------------------------------------------------------
+
+
+    - Show the active session list
+
+            vsaudit > session list
+
+            - session id: 0     intercept detached in progress
+
+            + Use session [session_id] to attach to process
+
+    - Decode on-the-fly the raw data-file
+
+        This command decodes on-the-fly the raw data stream that is stored in a file with sox library.
+        It's useful to listen the voice-call in realtime.
+
+            vsaudit > decode [raw-file]
+
+
+Global commands:
+-----------------------------------------------------------------------------------------------------------------------------
+
+    - Display the help message
+
+        vsaudit > help
+        or
+        vsaudit > h [description|environment|audit|filters|informations|global]
+
+        Example:
+
+            vsaudit > h
+
+                + DESCRIPTION:
+
+                    The vsaudit is an opensource framework to perform attacks to general voip services
+                    It allows to scans the whole network or single host to do the gathering phase, then 
+                    it is able to search for most known vulnerabilities on the founds alive hosts and 
+                    try to exploit them.
+
+
+                + ENVIRONMENT COMMANDS:
+
+                    Command         Args                    Description
+                    s|set           [key] [value]           Set an environment variable
+                    g|get           [key]                   Get an environment variable value/s
+                    e|env           -                       Display all environment variables
+
+
+                + ENVIRONMENT VARIABLES:
+
+                    Option          Value                   Description
+                    PORT            [*r|5060]               Set port range (default: 5060)
+                    TIMEOUT         [1|0.5]                 Set scanner timeout connect()/recv() (default: 1 seconds)
+                    THREADS         [1|200]                 Set scanner threads limit (default: 50 concurrency)
+                    TRANSPORT       [udp|tcp]               Set transport for enumeration/bruteforce (default: udp)
+                    IFACE           [eth0|wlan1]            Indicate which interface to use to capture network traffic (default: eth0)
+                    DUMPHEX         [on|off]                Dump network traffic in hexadecimal (default: off)
+                    DUMPCLEAN       [on|off]                Clear network traffic skipping unicode frame bytes (default: on)
+
+                * r: range  ex. '0-65535'
+
+
+                + AUDIT COMMANDS:
+
+                    Command         Args                    Description
+                    f|fcheck        -                       Check for common configurations mistakes
+                    sn|scan         [addr[/24]]             Start information gathering scanner
+                    en|enum         [*r|*e] [addr]          Enumerate/Test sip extensions (accounts)
+                    bf|bruteforce   [*r|*e] [*p] [addr]     Try to bruteforce sip extension(s)
+
+                    * r: range  ex. 0500-6000
+                    * e: ext-file   ex. 'ext-list'
+                    * p: psw-file   ex. 'psw-list'
+
+
+                + PCAP BASE FILTERS:
+
+                    Filter                                  Description
+                    udp dst port 5060                       Intercept destination udp traffic to destination port 5060
+                    tcp port 5060                           Intercept source and destination tcp traffic from source port 5060
+                    ip host 192.168.1.100                   Intercept source and destination both udp/tcp traffic
+                    password                                Intercept the sip md5 challenge response hash (WWW-Authenticate)
+
+
+                + INFO COMMANDS:
+
+                    Command         Args                    Description
+                    i|info          [module|addr]           Return informations about module or address in report list
+                    r|report        -                       Show scanner report with grouped trasports data
+                    ex|exts         -                       Show extensions enumeration report
+                    se|session      [list|session_id]       Show extensions enumeration report
+                    lv|live         [addr]                  Get all or filtered live network traffic data
+                    in|intercept    [pcap-filter]           Filter network traffic using pcap filters (live extended)
+                    dc|decode       [raw-file]              Decode on-the-fly raw data-file stream (listen the voice-call)
+
+                    * intercept: append option 'detach' to sessionize action
+                    * intercept: append option 'record' to save stream to file
+
+
+                + GLOBAL COMMANDS:
+
+                    Command         Args                    Description
+                    q|quit|exit     -                       Exit
+                    h|help          [what]                  Display the help messages
+                                                            description | environment | audit | filters | informations | global
+
+
+    - Quit from the framework
+
+        vsaudit > exit
+        or
+        vsaudit > q

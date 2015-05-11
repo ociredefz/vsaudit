@@ -1,0 +1,51 @@
+CHANGELOG VSAUDIT - 2015.1
+--------------------------
+
+2005.2 - 01-05-2015
+
+    Added:
+
+        * Decoding function that reads the realtime the voice-call (dev).
+        * Ruby-sox library support for the encoding of raw stream (dev).
+        * Dumpclean and dumphex for alternates stream output (dev).
+        * Sessions for daemonize processes (available in intercept feature).
+
+
+    Fixes:
+
+        * Fixed the multiple sessions in the intercept.
+        * Various bug fixes.
+
+
+2015.1 - 28-04-2015
+
+    Added:
+
+        * Record to file network stream with 'intercept' by adding record to bpf.
+        * Threads limit environment variable for scanner.
+        * Extensions bruteforce with 'bf|bruteforce'.
+        * Network password sniffer through 'intercept password'.
+        * Password test in the enumeration, see README for usage.
+        * new command 'l|live' that capture current network traffic.
+        * new command 'in|intercept' that capture network traffic using bpf filter syntax.
+        * TCP support in extensions enumeration.
+        * Modules and addresses informations with 'i|info'.
+        * Extensions enumeration in Asterisk custom module.
+        * Support for the shell commands in cases when vsaudit command doesn't exists.
+
+
+    Removed:
+
+        * Some unused features.
+
+
+    Changes:
+
+        * Scanner is now more faster by pthreads implementation.
+        * Updated the report list with extensions enumeration informations.
+
+
+    Fixes:
+
+        * Some in-code conditions.
+        * Extensions input range parser flaw.
