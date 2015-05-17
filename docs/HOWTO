@@ -318,7 +318,7 @@ Audit commands:
 
     - Bruteforce extensions
 
-        Here you can try to crack extensions with a password list.
+        Here you can try to bruteforce the extensions with a password list.
 
 
         How to use it:
@@ -363,7 +363,7 @@ Audit commands:
 
     - Get the live network traffic
 
-        Here you can monitor live network traffic using standard bpf filter.
+        Here you can monitor live network traffic using standard bpf filter (Barkeley Packet Filter).
 
 
         How to use it:

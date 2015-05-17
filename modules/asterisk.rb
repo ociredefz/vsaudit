@@ -19,7 +19,7 @@ SIP_BASE_REQUEST = "[METHOD] sip:[DST_URI] SIP/2.0\r\n" \
 "Content-Length: 0\r\n" \
 "Max-Forwards: 70\r\n\r\n\r\n"
 
-# Availables SIP methods.
+# Available SIP methods.
 SIP_METHODS = [
 	:OPTIONS 	=> '1 OPTIONS',
 	:REGISTER 	=> '2 REGISTER'
@@ -68,7 +68,7 @@ module AsteriskModule
 		:methods		=> /Allow:/
 	]
 
-	# Alives devices (Leaves empty).
+	# Alive devices (Leaves empty).
 	# List of found devices with related informations
 	# about service version and allowed public methods.
 	@@devices = []
@@ -78,7 +78,7 @@ module AsteriskModule
 	# informations.
 	@@extensions = []
 
-	# Checks for service informations and vulnerabilities.
+	# Check for service informations and vulnerabilities.
 	# This method will be used to manage the alive hosts
 	# found by the tcp port scanner, maybe to identify the
 	# system informations and vulnerabilities.
@@ -111,12 +111,12 @@ module AsteriskModule
 		end
 	end
 
-	# Checks for service informations and vulnerabilities.
+	# Check for the service informations and vulnerabilities.
 	# This method will be used to manage the alive hosts
 	# found by the tcp port scanner, maybe to identify the
 	# system informations and vulnerabilities.
 	def parse_udp(socket, address, port, timeout)
-		# Generates payload header.
+		# Generate the payload header.
 		header = generate_payload(SIP_BASE_REQUEST.dup, [
 			:method		=> SIP_METHODS.first[:OPTIONS], 
 			:extension	=> '7001', 
@@ -125,12 +125,12 @@ module AsteriskModule
 			:transport	=> 'UDP'
 		])
 
-		# Sends the udp sip request.
+		# Send the udp sip request.
 		send_request(socket, 'udp', header)
 
 		begin
 			Timeout.timeout(timeout) {
-				# Validates the possible sip reply.
+				# Validate the possible sip reply.
 				buf = read_request(socket, 'udp')
 
 				if buf.to_s.include?('SIP/')
@@ -176,7 +176,7 @@ module AsteriskModule
 
 			print "  #{GB}> testing extension:#{RST} %-22s#{RST}\r" % [e]
 
-			# Generates payload header.
+			# Generate the payload header.
 			header = generate_payload(SIP_BASE_REQUEST.dup, [
 				:method		=> SIP_METHODS.first[:REGISTER], 
 				:extension	=> e.to_s, 
@@ -185,17 +185,17 @@ module AsteriskModule
 				:transport	=> transport.upcase
 			])
 
-			# Checks if socket alive.
+			# Check if the socket is alive.
 			if socket == nil
 				return false
 			end
 
-			# Sends the udp sip request.
+			# Send the udp sip request.
 			send_request(socket, transport, header)
 
 			begin
 				Timeout.timeout(timeout) {
-					# Validates the possible sip reply.
+					# Validate the possible sip reply.
 					buf = read_request(socket, transport)
 
 					paddr = address + ':' + port.to_s
@@ -243,7 +243,7 @@ module AsteriskModule
 	end
 
 	# Bruteforce method.
-	# Executes extension(s) bruteforce base on 
+	# Execute extension(s) bruteforce base on 
 	# password file list.
 	def bruteforce(socket, extension, address, port, passwords, transport, timeout)
 		passwords.each { |p|
@@ -253,7 +253,7 @@ module AsteriskModule
 
 			print "  #{GB}> testing authentication: #{RST}%-16s : %-22s#{RST}\r" % [extension, p]
 
-			# Generates payload header.
+			# Generate the payload header.
 			header = generate_payload(SIP_BASE_REQUEST.dup, [
 				:method		=> SIP_METHODS.first[:REGISTER], 
 				:extension	=> extension.to_s, 
@@ -262,24 +262,24 @@ module AsteriskModule
 				:transport	=> transport.upcase
 			])
 
-			# Checks if socket alive.
+			# Checks if the socket is alive.
 			if socket == nil
 				return false
 			end
 
-			# Sends the udp sip request.
+			# Send the udp sip request.
 			send_request(socket, transport, header)
 
 			begin
 				Timeout.timeout(timeout) {
-					# Validates the possible sip reply.
+					# Validate the possible sip reply.
 					buf = read_request(socket, transport)
 
 					paddr = address + ':' + port.to_s
 					tmp = []
 
 					if buf.to_s.include?('WWW-Authenticate')
-						# Validates the possible sip reply.
+						# Validate the possible sip reply.
 						tmp = _exec_authentication(socket, buf, address, port, extension, p, header, transport)
 
 						unless tmp == false
@@ -313,9 +313,9 @@ module AsteriskModule
 		}
 	end
 
-	# Executes authentication request.
+	# Execute the authentication request.
 	def _exec_authentication(socket, buf, address, port, extension, passwd, header, transport)
-		# Gets realm and nonce from response, to generate
+		# Get the realm and nonce from response, to generate
 		# the md5 challenge that produces the response hash 
 		# for sip authentication.
 		realm = /realm="(.*)",/.match(buf).to_a.last
@@ -330,7 +330,7 @@ module AsteriskModule
 		md5_final = Digest::MD5.new
 		md5_final.update(md5_first.hexdigest + ':' + nonce.to_s + ':' + md5_last.hexdigest)
 
-		# Generates authentication string with md5 challenge.
+		# Generate authentication string with md5 challenge.
 		authenticator = "Authorization: Digest username=\"%s\", " \
 		"realm=\"%s\", nonce=\"%s\", opaque=\"\", uri=\"sip:%s\", " \
 		"response=\"%s\", algorithm=MD5\r\n" % [
@@ -353,7 +353,7 @@ module AsteriskModule
 			auth_pos -= 1
 		}
 
-		# Sends new request with authentication.
+		# Send a new request with authentication.
 		send_request(socket, transport, header_auth)
 
 		buf_response = read_request(socket, transport)
@@ -373,10 +373,10 @@ module AsteriskModule
 		return false
 	end
 
-	# Sends network request.
+	# Send the network request.
 	def send_request(descriptor, transport, header)
 		begin
-			# Sends the udp sip request.
+			# Send the udp sip request.
 			if transport == 'udp'
 				descriptor.send(header.chomp, 0)
 			else
@@ -389,9 +389,9 @@ module AsteriskModule
 		end
 	end
 
-	# Reads network response.
+	# Read the network response.
 	def read_request(descriptor, transport)
-		# Validates the possible sip reply.
+		# Validate the possible sip reply.
 		if transport == 'udp'
 			buf, raddr = descriptor.recvfrom(2048)
 		else
@@ -401,7 +401,7 @@ module AsteriskModule
 		return buf
 	end
 
-	# Parses tcp/udp network response.
+	# Parse the tcp/udp network response.
 	def parse_response(address, port, buf, transport)
 		tmp = []
 
@@ -411,7 +411,7 @@ module AsteriskModule
 			regex = @@services_udp_detect_regex
 		end
 
-		# Loops through identifiers to match the correct
+		# Loop through identifiers to match the correct
 		# targeted system informations.
 		buf.to_s.split("\n").each { |line|
 			# Detects service informations.
@@ -432,7 +432,7 @@ module AsteriskModule
 				end
 			end
 
-			# Detects allowed methods from service.
+			# Detect allowed methods from service.
 			r = regex.first[:methods]
 			unless r.nil?
 				if line =~ r
@@ -449,13 +449,13 @@ module AsteriskModule
 		end
 	end
 
-	# Generates payload header.
+	# Generate the payload header.
 	def generate_payload(header, data)
 		data = data.first
-		# Generates random payload data.
+		# Generate the random payload data.
 		est = gen_essentials
 
-		# Replaces occurrencies.
+		# Replace the occurrencies.
 		header.gsub!('[USERAGENT]',		'vsaudit-ua')
 		header.gsub!('[TRANSPORT]',		data[:transport])
 		header.gsub!('[METHOD]',		data[:method].split(' ').last)
@@ -469,16 +469,16 @@ module AsteriskModule
 		header.gsub!('[TAG_ID]',		est[:tag_id])
 		header.gsub!('[TAG_ID_CALL]',	est[:tag_id_call])
 
-		# Returns generated payload.
+		# Return the generated payload.
 		return header
 	end
 
-	# Generates random payload data.
+	# Generate the random payload data.
 	def gen_essentials
 		# Basic alphanumeric characters list.
 		list = [('a'..'z'), (0..9)].map { |i| i.to_a }.flatten
 
-		# Generates a branch string.
+		# Generate a branch string.
 		branch_hash = ''
 		branch = (0...15).map { 
 			list[rand(list.length)] 
@@ -501,12 +501,12 @@ module AsteriskModule
 			list[rand(list.length)] 
 		}.join)
 
-		# Generates a tag_id string.
+		# Generate a tag_id string.
 		tag_id = (0...8).map { 
 			list[rand(list.length)] 
 		}.join
 
-		# Generates a tag_id_call string.
+		# Generate a tag_id_call string.
 		tag_id_call = (0...8).map { 
 			list[rand(list.length)] 
 		}.join

@@ -17,7 +17,7 @@ class Utilities
 
 	public
 
-	# Loads custom modules.
+	# Load the custom modules.
 	def load_modules
 		puts " ---------------------------------------------------------------"
 		puts " #{GB}vsaudit v#{VERSION} #{RST}- voip/sip auditing framework             "
@@ -38,7 +38,7 @@ class Utilities
 		puts " #{GB}Loaded: #{RST}#{i}\n\n"
 	end
 
-	# Sets the base environment options.
+	# Set the base environment options.
 	def set_base_env
 		$environ::set_env([nil, 'PORT',      '5060'], false)
 		$environ::set_env([nil, 'TIMEOUT',   '1'],    false)
@@ -49,17 +49,19 @@ class Utilities
 		$environ::set_env([nil, 'DUMPCLEAN', 'on'],   false)
 	end
 
-	# Gets informations about module or address in report list.
+	# Get the informations about module 
+	# or address in report list.
 	def get_info(command)
 		command.shift
 
 		unless command.empty?
 			name = command.take(1).first
 
-			# Checks for address in report list.
+			# Check for the address in report list.
 			found = _get_device_info(name)
 
-			# Checks for module.
+			# Loop through the modules and 
+			# execute the context method.
 			$modules.each { |m|
 				if m.to_s.gsub(/Module/, '').downcase == name
 					puts "\n Module '#{GB}%s#{RST}' found:\n\n" \
@@ -86,7 +88,7 @@ class Utilities
 		end
 	end
 
-	# Checks if shell command exists, this function
+	# Check if shell command exists, this function
 	# starts when a vsaudit command was not found.
 	def do_sh_command?(command)
 		command.each { |c| 
@@ -96,11 +98,11 @@ class Utilities
 		system(command.join(' '))
 	end
 
-	# Validates an IPV4 address.
+	# Validate an IPV4 address.
 	def valid_address?(addr)
 		addr.each { |x| 
 			if x.include?('/')
-				# Match netblock (ex. ip/8 ip/16 ip/24 ...)
+				# Match the netblock (ex. ip/8 ip/16 ip/24 ...)
 				if x =~ /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/([0-9]{1,3})$/
 					return true
 				else
@@ -108,7 +110,7 @@ class Utilities
 					return false
 				end
 			else
-				# Checks for valid address.
+				# Check for a valid address.
 				begin
 					Resolv.getaddress(x)
 					return true
@@ -122,9 +124,9 @@ class Utilities
 		return false
 	end
 
-	# Validates a single IPV4 address.
+	# Validate a single IPV4 address.
 	def valid_single_address?(addr)
-		# Checks for valid address.
+		# Check for a valid address.
 		begin
 			Resolv.getaddress(addr)
 			return true
@@ -136,7 +138,7 @@ class Utilities
 		return false
 	end
 
-	# Validates ports range.
+	# Validate the ports range.
 	def valid_ports_range?(range)
 		if range.to_s.include?('-')
 			if range.first.to_s =~ /^([0-9]{1,5})(\-)([0-9]{1,5})$/
@@ -155,7 +157,7 @@ class Utilities
 		end
 	end
 
-	# Validates scanner timeout value.
+	# Validate the scanner timeout value.
 	# Possibles values are floats or integers.
 	def valid_timeout?(seconds)
 		begin
@@ -167,7 +169,7 @@ class Utilities
 		end
 	end
 
-	# Validates scanner thread limit value.
+	# Validate the scanner thread limit value.
 	# Possibles values are integers.
 	def valid_threads_limit?(seconds)
 		begin
@@ -179,7 +181,7 @@ class Utilities
 		end
 	end
 
-	# Validates transport value.
+	# Validate the transport value.
 	# Possibles values are udp or tcp.
 	def valid_transport?(transport)
 		if transport.first.to_s.downcase =~ /^(udp|tcp)$/
@@ -190,7 +192,7 @@ class Utilities
 		end
 	end
 
-	# Validates interface name.
+	# Validate the interface name.
 	def valid_interface?(iface)
 		if iface.first.to_s =~ /^([a-z]{1,8}[0-9]{0,4})$/
 			return true
@@ -200,7 +202,7 @@ class Utilities
 		end
 	end
 
-	# Validates on off values.
+	# Validate on off values.
 	# Possibles values are on or off.
 	def valid_onoff?(transport)
 		if transport.first.to_s.downcase =~ /^(on|off)$/
@@ -211,7 +213,7 @@ class Utilities
 		end
 	end
 
-	# Display help message.
+	# Display the help message.
 	def print_help(command = [])
 		disp = false
 		command.shift
@@ -323,9 +325,11 @@ class Utilities
 
 	private
 
-	# Gets extensions list related to name if exists.
+	# Get the extensions list that is 
+	# related to name if exists.
 	def _get_device_info(name)
 		found = 0
+		name = Resolv.getaddress(name)
 
 		$auditer::report_list.each { |r|
 			if r.first[:service_address] == name then found += 1

@@ -29,8 +29,8 @@ CB	= "\e[1;36m"
 class Environment < Utilities
 	protected
 
-	# Availables environment options list,
-	# with the mapped callback functions.
+	# Available environment options list,
+	# with mapped callback functions.
 	@@env_options = [
 		'PORT'		=> 'valid_ports_range?',
 		'TIMEOUT'	=> 'valid_timeout?',
@@ -43,7 +43,7 @@ class Environment < Utilities
 
 	public
 
-	# Gets list of environment variables.
+	# Get the list of environment variables.
 	def list_env
 		if ENV.keys.grep(/#{ENV_PREFIX}/).length === 0
 			return puts "- note: environment table is empty"
@@ -56,7 +56,7 @@ class Environment < Utilities
 		}
 	end
 	
-	# Sets a key value.
+	# Set the key value of an environment variable.
 	def set_env(command, prt = nil)
 		command.shift
 
@@ -83,7 +83,7 @@ class Environment < Utilities
 		end
 	end
 
-	# Gets a key value.
+	# Get the key value of an environment variable.
 	def get_env(command, getv = nil)
 		command.shift
 

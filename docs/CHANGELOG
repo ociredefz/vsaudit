@@ -1,13 +1,27 @@
 CHANGELOG VSAUDIT - 2015.1
 --------------------------
 
-2005.2 - 01-05-2015
+2015.RC3 - 17-05-2015
 
     Added:
 
         * Decoding function that reads the realtime the voice-call (dev).
         * Ruby-sox library support for the encoding of raw stream (dev).
-        * Dumpclean and dumphex for alternates stream output (dev).
+        * Distinct silent-mode of each session.
+        * Dumpclean stream output (skip the first 44 bytes of the SIP header response).
+
+
+    Fixes:
+
+        * Check for the effective alive sessions in the list (kill-the-zombies).
+        * Some conflicts in silent-mode with the intercept.
+
+
+2015.RC2 - 01-05-2015
+
+    Added:
+
+        * Dumphex for the hexadecimal stream output.
         * Sessions for daemonize processes (available in intercept feature).
 
 
@@ -17,7 +31,7 @@ CHANGELOG VSAUDIT - 2015.1
         * Various bug fixes.
 
 
-2015.1 - 28-04-2015
+2015.RC1 - 28-04-2015
 
     Added:
 

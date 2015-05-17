@@ -48,7 +48,7 @@ class Auditer < Utilities
 	@@threads		= []
 
 	# Silent mode.
-	@@silent		= false
+	@@silent		= []
 
 	public
 
@@ -63,11 +63,13 @@ class Auditer < Utilities
 		@@report_list
 	end
 
-	# Performs the auditing on configuration
+	# Perform the auditing on configuration
 	# files of various voip services.
 	def verify_conf_files
 		puts "\n  #{GB}Checking for flaws or mistakes in the configuration files..#{RST}\n"
 
+		# Loop through the modules and 
+		# execute the context method.
 		$modules.each { |m| 
 			services_files = m.class_variable_get(:@@services_files).first
 
@@ -106,7 +108,7 @@ class Auditer < Utilities
 			arguments = command.take(2)
 			address   = arguments.first.to_s
 
-			# Checks and parses the netblock range
+			# Check and parse the netblock range
 			# format if exists.
 			if address.include?('/')
 				puts "#{GB}+ netblock in-addr:#{RST} type an ip address or press enter to scan ip/s recursively"
@@ -132,13 +134,13 @@ class Auditer < Utilities
 				end
 			end
 
-			# Gets and sets environment global variables.
+			# Get and set the environment global variables.
 			_set_ports
 			_set_timeout
 			_set_transport
 			_set_threads_limit
 
-			# Dispatches port scan.
+			# Dispatch the transport.
 			case @@transport
 				when 'tcp' then init_scan(address)
 				when 'udp' then init_scan(address)
@@ -148,7 +150,7 @@ class Auditer < Utilities
 		end
 	end
 
-	# Initializes TCP/UDP port scanner.
+	# Initialize TCP/UDP port scanner.
 	def init_scan(address)
 		start_port	= @@start_port
 		end_port	= @@end_port
@@ -159,7 +161,7 @@ class Auditer < Utilities
 
 		# Multiple targets in port scanner scope.
 		if @@recursive === true
-			# Converts IP netblock range to long format.
+			# Convert IP netblock range to long format.
 			netblock		= IPAddr.new(address)
 			netblock_orig	= IPAddr.new(address.split('/').first)
 
@@ -167,15 +169,15 @@ class Auditer < Utilities
 			long_addr_last  = netblock.to_range.last.to_i
 			long_addr_last += 1
 
-			# Tests each IP address in range.
+			# Test each IP address in range.
 			until long_addr_first == long_addr_last do
 				threads		= []
 				threads_inc = 0
 
-				# Converts back long ip to string format.
+				# Convert back the long ip to string format.
 				new_addr = IPAddr.new(long_addr_first, Socket::AF_INET).to_s
 
-				# Scans target with single port.
+				# Scan the target with single port.
 				if start_port == end_port
 					paddr = new_addr + ":" + start_port.to_s
 					print "  #{GB}> scanning addr:#{RST} %-22s\r" % [paddr]
@@ -184,7 +186,7 @@ class Auditer < Utilities
 
 					threads.each { |thr| thr.join }
 				else
-					# Scans target with each ports in range.
+					# Scan the target with each ports in range.
 					until start_port == end_port do
 						paddr = new_addr + ":" + start_port.to_s
 						print "  #{GB}> scanning addr:#{RST} %-22s\r" % [paddr]
@@ -202,7 +204,7 @@ class Auditer < Utilities
 					end
 				end
 
-				# Resets to previous values.
+				# Reset to the previous values.
 				start_port	= @@start_port
 				end_port	= @@end_port
 
@@ -213,7 +215,7 @@ class Auditer < Utilities
 			threads		= []
 			threads_inc = 0
 
-			# Scans target with single port.
+			# Scan the target with single port.
 			if start_port == end_port
 				paddr = address + ":" + start_port.to_s
 				print "  #{GB}> scanning addr:#{RST} %-22s\r" % [paddr]
@@ -221,7 +223,7 @@ class Auditer < Utilities
 				_thread_request(address, start_port, threads)
 
 				threads.each { |thr| thr.join }
-			# Scans target with each ports in range.
+			# Scan the target with each ports in range.
 			else
 				until start_port == end_port do
 					paddr = address + ":" + start_port.to_s
@@ -244,6 +246,7 @@ class Auditer < Utilities
 		report_scan(false, true)
 	end
 
+	# Switch the transport scanner request.
 	def _thread_request(address, port, threads)
 		threads << Thread.new {
 			if @@transport == 'tcp'
@@ -256,10 +259,12 @@ class Auditer < Utilities
 		}
 	end
 
-	# Shows scanner report.
+	# Show the scanner report.
 	def report_scan(dev = nil, scan = nil)
 		disp = true
 
+		# Loop through the modules and 
+		# execute the context method.
 		$modules.each { |m|
 			if dev.nil?
 				devices = @@report_list
@@ -269,7 +274,7 @@ class Auditer < Utilities
 
 			unless devices.empty?
 				if disp === true
-					# Displays resumed devices informations.
+					# Display resumed devices informations.
 					puts " " unless scan.nil?
 					puts " \n"
 					puts "  #{RST}----------------------------------------------------------------------------------------------------------------------"
@@ -306,7 +311,7 @@ class Auditer < Utilities
 		}
 	end
 
-	# Enumerate sip extensions.
+	# Enumerate the sip extensions.
 	def enum_extensions(command)
 		command.shift
 
@@ -317,7 +322,7 @@ class Auditer < Utilities
 
 			contents  = []
 
-			# Parses address or uses the report list
+			# Parse the address or use the report list.
 			if arguments.length == 1
 				return puts "#{RB}- error:#{RST} no address specified or yet found in report list" if @@report_list.empty?
 				address = @@report_list
@@ -325,7 +330,7 @@ class Auditer < Utilities
 				return false unless valid_single_address?(address)
 			end
 
-			# Gets and sets environment global variables.
+			# Get and set the environment global variables.
 			_set_transport
 			_set_ports
 
@@ -346,7 +351,7 @@ class Auditer < Utilities
 				_exec_enumeration(contents, address)
 			# Extensions in file.
 			else
-				# Checks extensions file.
+				# Check the extensions file.
 				if (contents = _organize_file_contents(range_file, 'extensions')) != false
 					_exec_enumeration(contents, address)
 				end
@@ -362,22 +367,22 @@ class Auditer < Utilities
 		arguments = command.take(1)
 		address   = arguments.first
 		
-		# Gets trasport and address if exists.
+		# Get the trasport and address if exists.
 		if arguments.length < 1
 			address = nil
 		end
 
-		# Gets and sets environment global variables.
+		# Get and set the environment global variables.
 		_set_transport
 
-		# Checks for valid address.
+		# Check for a valid address.
 		if address != nil && address.length > 0
 			if valid_single_address?(address) === false
 				return false
 			end
 		end
 
-		# Switches trasports.
+		# Dispatch the transport.
 		case @@transport
 			when 'tcp' then _exec_intercept(address)
 			when 'udp' then _exec_intercept(address)
@@ -386,7 +391,7 @@ class Auditer < Utilities
 		end
 	end
 
-	# Intercept network traffic (sniffer-mode)
+	# Intercept the network traffic (sniffer-mode)
 	def intercept(command)
 		command.shift
 
@@ -397,7 +402,7 @@ class Auditer < Utilities
 		end
 	end
 
-	# Does an extension bruteforce.
+	# Extension bruteforce.
 	def bruteforce(command)
 		command.shift
 
@@ -410,7 +415,7 @@ class Auditer < Utilities
 			contents   = []
 			passwords  = []
 
-			# Gets and sets environment global variables.
+			# Get and set the environment global variables.
 			_set_transport
 			_set_ports
 
@@ -429,13 +434,13 @@ class Auditer < Utilities
 				end
 			# Extensions in file.
 			else
-				# Checks extensions file.
+				# Check the extensions file.
 				if (contents = _organize_file_contents(range_file, 'extensions')) == false
 					return false
 				end
 			end
 
-			# Checks password file.
+			# Check the password file.
 			if (passwords = _organize_file_contents(psw_file, 'password')) != false
 				return false unless valid_single_address?(address)
 				_exec_bruteforce(address, contents, passwords)
@@ -445,7 +450,7 @@ class Auditer < Utilities
 		end
 	end
 
-	# Returns extensions report.
+	# Return the extensions report.
 	def report_extensions(address = nil, enum = nil)
 		found = 0
 		disp  = true
@@ -504,7 +509,7 @@ class Auditer < Utilities
 		return found
 	end
 
-	# Shows active session threads.
+	# Show the active session threads.
 	def session(command)
 		command.shift
 		found = false
@@ -515,14 +520,16 @@ class Auditer < Utilities
 
 			if thread_join == 'list'
 				@@threads.each { |thr|
-					if found == false
-						found = true
-						puts "\n"
+					if thr.alive?
+						if found == false
+							found = true
+							puts "\n"
+						end
+
+						puts "  #{GB}- #{RST}session id: #{GB}%-2d\t#{RST}intercept detached in progress" % @@threads.index(thr)
+
+						thread_pos += 1
 					end
-
-					puts "  #{GB}- #{RST}session id: #{GB}%-2d\t#{RST}intercept detached in progress" % @@threads.index(thr)
-
-					thread_pos += 1
 				}
 
 				if found == false
@@ -532,32 +539,38 @@ class Auditer < Utilities
 				end
 			else
 				@@threads.each { |thr|
-					if @@threads.index(thr) == thread_join.to_i
-						@@silent = false
+					if thr.alive?
+						if @@threads.index(thr) == thread_join.to_i
+							@@silent[thread_pos] = false
 
-						if found == false
-							found = true
-							puts "\n"
+							if found == false
+								found = true
+								puts "\n"
+							end
+
+							puts "  #{GB}- #{RST}session id: #{GB}%-2d\t#{RST}intercept detached in progress" % @@threads.index(thr)
+
+							begin
+								thr.join
+							rescue Interrupt
+								puts "\r\r  #{GB}+ #{RST}Packet Capture stopped by interrupt signal."
+								puts "  #{GB}%s#{RST} packets received by filter\n" % [@@capture[@@threads.index(thr)].stats['recv']]
+								puts "  #{GB}%s#{RST} packets dropped by kernel\n\n" % [@@capture[@@threads.index(thr)].stats['drop']]
+
+								@@capture[@@threads.index(thr)].close
+
+								@@silent.delete_at(thread_pos)
+								@@capture.delete_at(@@threads.index(thr))
+								@@threads.delete_at(@@threads.index(thr))
+							rescue Errno::EBADF
+								@@silent.delete_at(thread_pos)
+								@@capture.delete_at(@@threads.index(thr))
+								@@threads.delete_at(@@threads.index(thr))
+							end
 						end
 
-						puts "  #{GB}- #{RST}session id: #{GB}%-2d\t#{RST}intercept detached in progress" % @@threads.index(thr)
-
-						begin
-							thr.join
-						rescue Interrupt
-							puts "\r\r  #{GB}+ #{RST}Packet Capture stopped by interrupt signal."
-							puts "  #{GB}%s#{RST} packets received by filter\n" % [@@capture[@@threads.index(thr)].stats['recv']]
-							puts "  #{GB}%s#{RST} packets dropped by kernel\n\n" % [@@capture[@@threads.index(thr)].stats['drop']]
-
-							@@silent = true
-							@@capture[@@threads.index(thr)].close
-							
-							@@capture.delete_at(@@threads.index(thr))
-							@@threads.delete_at(@@threads.index(thr))
-						end
+						thread_pos += 1
 					end
-
-					thread_pos += 1
 				}
 
 				if found == false
@@ -569,7 +582,7 @@ class Auditer < Utilities
 		end
 	end
 
-	# Decodes on-the-fly the raw data-file with sox
+	# Decode on-the-fly the raw data-file with sox
 	# and try to listen the captured voice-call.
 	def decode(command)
 		command.shift
@@ -582,7 +595,7 @@ class Auditer < Utilities
 
 	private
 
-	# Checks for udp open port, target informations
+	# Check for the udp open port, target informations
 	# through custom modules and vulnerabilities
 	# identification.
 	def _is_udp_port_open?(address, port)
@@ -591,7 +604,8 @@ class Auditer < Utilities
 		begin
 			socket.connect(address, port)
 
-			# Call modules method for checking the service.
+			# Loop through the modules and 
+			# execute the context method.
 			$modules.each { |m|
 				m.send('parse_udp', socket, address, port, @@timeout)
 			}
@@ -602,7 +616,7 @@ class Auditer < Utilities
 		end
 	end
 
-	# Checks for tcp open port, target informations
+	# Check for the tcp open port, target informations
 	# through custom modules and vulnerabilities
 	# identification.
 	def _is_tcp_port_open?(address, port)
@@ -611,7 +625,8 @@ class Auditer < Utilities
 			begin
 				socket = TCPSocket.new(address, port)
 
-				# Call modules method for checking the service.
+				# Loop through the modules and 
+				# execute the context method.
 				$modules.each { |m|
 					m.send('parse_tcp', socket, address, port)
 				}
@@ -627,10 +642,12 @@ class Auditer < Utilities
 		end
 	end
 
-	# Executes the extensions enumeration.
+	# Execute the extensions enumeration.
 	def _exec_enumeration(list, address)
+		# Loop through the modules and 
+		# execute the context method.
 		$modules.each { |m| 
-			# Address from report list.
+			# Address from the report list.
 			if address.kind_of?(Array)
 				address.each { |a|
 					address  = a.first[:service_address]
@@ -663,7 +680,7 @@ class Auditer < Utilities
 
 					print "\n"
 				}
-			# Address specified manually.
+			# Address have been specified manually.
 			else
 				start_port = @@start_port
 				end_port   = @@end_port
@@ -705,10 +722,10 @@ class Auditer < Utilities
 				print "\n"
 			end
 
-			# Update extensions list with last enumeration.
+			# Update the extensions list with last enumeration.
 			extensions = m.class_variable_get(:@@extensions)
 			unless extensions.empty?
-				# Shows extensions report list.
+				# Show the extensions report list.
 				report_extensions(nil, extensions)
 
 				@@extensions_list.concat(extensions)
@@ -720,7 +737,7 @@ class Auditer < Utilities
 		}
 	end
 
-	# Executes the real network interception.
+	# Execute the real network interception.
 	def _exec_intercept(address = nil, filter = nil)
 		_set_iface
 		_set_dump
@@ -735,29 +752,29 @@ class Auditer < Utilities
 			return puts "#{RB}- error: #{RST}%s" % [error]
 		end
 
-		# Checks for custom filter (intercept).
+		# Check for a custom filter (intercept).
 		unless filter.nil?
 			filter  = filter.join(' ')
 
-			# Enables authentication sniffing.
+			# Enable the authentication sniffing mode.
 			if filter == 'password'
 				filter = 'udp or tcp'
 				custom = 'password'
 			else
-				# Checks for detached mode.
+				# Check for the detached mode.
 				if filter.include?('detach')
 					filter = filter.gsub(' detach', '')
 					custom += 'detach'
 				end
 
-				# Checks if stream needs to be write to file.
+				# Check if the stream needs to be write to the file.
 				if filter.include?('record')
 					filter = filter.gsub(' record', '')
 					custom += 'record'
 				end
 			end
 
-			# Sets the custom filter.
+			# Set the custom filter.
 			if (error = _set_bp_filter(@@capture[capture_len], filter)) != true
 				return puts "#{RB}- error: #{RST} you have entered an invalid filter (%s)" % [error.message]
 			end
@@ -765,12 +782,12 @@ class Auditer < Utilities
 		else
 			filter = @@transport
 
-			# Append address to filter traffic by target.
+			# Append address to the filter traffic by a target.
 			unless address.nil?
 				filter << ' and ip host ' << address
 			end
 
-			# Sets the custom filter.
+			# Set the custom filter.
 			if (error = _set_bp_filter(@@capture[capture_len], filter)) != true
 				return puts "#{RB}- error: #{RST} you have entered an invalid filter (%s)" % [error.message]
 			end
@@ -781,35 +798,39 @@ class Auditer < Utilities
 			"  #{GB}using barkeley packet filter:#{RST}\t%s\n\n" % [filter],
 			"  #{RB}note: #{RST}the unneeded frame bytes will be skipped by the parser\n\n"
 
-		# Loops through packets.
+		# Loop through the packets.
 		begin
 			# Open packet capture in thread
 			# to prevent an heap overflow that
 			# occurs using pcap library along 
 			# with ruby threads.
 			@@threads << Thread.new {
-				@@capture[capture_len].each_packet { |packet|
-					_print_packet(packet, custom)
-				}
+				if @@capture[capture_len]
+					@@capture[capture_len].each_packet { |packet|
+						_print_packet(packet, custom, capture_len)
+					}
+				end
 
 				Thread.exit
 			}
 
-			# Checks for background session.
+			# Check for the background session.
 			if custom.include?('detach')
+				@@silent[capture_len] = true
 				@@threads.last.run
-				@@silent = true
 			else
+				@@silent[capture_len] = false
 				@@threads.last.join
-				@@silent = false
 			end
 		rescue Interrupt
 			puts "\r\r  #{GB}+ #{RST}Packet Capture stopped by interrupt signal."
 			puts "  #{GB}%s#{RST} packets received by filter\n" % [@@capture[capture_len].stats['recv']]
 			puts "  #{GB}%s#{RST} packets dropped by kernel\n\n" % [@@capture[capture_len].stats['drop']]
 
-			@@silent = true
 			@@capture[capture_len].close
+			@@silent.delete_at(capture_len)
+			@@capture.delete_at(capture_len)
+			@@threads.delete_at(capture_len)
 		rescue Exception => error
 			puts "\n  - error: #{error}"
 			retry
@@ -817,7 +838,7 @@ class Auditer < Utilities
 	end
 
 	# Print packet data skipping unneeded frame bytes.
-	def _print_packet(packet, custom)
+	def _print_packet(packet, custom, capture_len)
 		top_line_frame = true
 
 		packet.data.to_s.each_line { |line|
@@ -834,54 +855,31 @@ class Auditer < Utilities
 						print '-'
 					}
 
-					# Checks for hexadecimal dump.
-					if @@dump_hex == 'on'
-						puts "\n"
-						line.each_byte { |x| 
-							print "%0.2x " % x 
-						} if @@silent == false
-					else
-						# The first 44 bytes of UDP model indicates
-						# UDP Header -> IP Header -> Padding
-						# so skip them.
-						if @@dump_clean == 'on'
-							puts "\n  %s" % [line.to_s[44..line.length]] if @@silent == false
-							# puts "\n  %s" % [line.to_s.split(/\(hex\)\s*/n).last]
-						else
-							puts "\n  %s" % line.to_s if @@silent == false
-						end
-					end
+					_dump(line, top_line_frame, capture_len)
 				else
-					# Checks for hexadecimal dump.
-					if @@dump_hex == 'on'
-						puts "\n"
-						line.each_byte { |x| 
-							print "%0.2x " % x 
-						} if @@silent == false
-					else
-						puts "  %s" % line.to_s if @@silent == false
-					end
+					_dump(line, top_line_frame, capture_len)
 				end
 
 				top_line_frame = false
 			# Sniff md5 challenge response hash.
 			else
-				# Tries to parse authentication phases.
+				# Try to parse the authentication phase.
 				if custom.include?('password')
-					# Call modules method for checking the service.
+					# Loop through the modules and 
+					# execute the context method.
 					$modules.each { |m|
 						m.send('parse_password', line, Time.at(packet.time).strftime('%F %T'))
 					}
 				else
-					# Checks for hexadecimal dump.
-					if @@dump_hex == 'on'
-						puts "\n"
-						line.each_byte { |x| print "%0.2x " % x } if @@silent == false
+					if top_line_frame == true
+						_dump(line, top_line_frame, capture_len)
 					else
-						puts "  %s" % line.to_s if @@silent == false
+						_dump(line, top_line_frame, capture_len)
 					end
 
-					# Writes the raw stream data to file (byte-to-byte).
+					top_line_frame = false
+
+					# Write the raw stream data to file (byte-to-byte).
 					if custom.include?('record')
 						File.open(TEMP_PATH + PCAP_RAW_FILE, 'ab') { |f|
 							line.each_byte { |b| f << b.chr }
@@ -892,8 +890,45 @@ class Auditer < Utilities
 		}
 	end
 
-	# Executes the bruteforcer.
+	# Dump the packet.
+	def _dump(line, top, capture_len)
+		if @@silent[capture_len] === false
+			if top === true
+				# Check for the hexadecimal dump.
+				if @@dump_hex == 'on'
+					puts "\n"
+					line.each_byte { |x| 
+						print "%0.2x " % x 
+					}
+				else
+					# The first 44 bytes of UDP model indicates
+					# UDP Header -> IP Header -> Padding
+					# so skip them.
+					if @@dump_clean == 'on'
+						puts "\n  %s" % [line.to_s[44..line.length]]
+						# puts "\n  %s" % [line.to_s.split(/\(hex\)\s*/n).last]
+					else
+						puts "\n  %s" % line.to_s
+					end
+				end
+			else
+				# Check for the hexadecimal dump.
+				if @@dump_hex == 'on'
+					puts "\n"
+					line.each_byte { |x| 
+						print "%0.2x " % x 
+					}
+				else
+					puts "  %s" % line.to_s
+				end
+			end
+		end
+	end
+
+	# Execute the bruteforcer.
 	def _exec_bruteforce(address, list, passwords)
+		# Loop through the modules and 
+		# execute the context method.
 		$modules.each { |m|
 			disp = true
 
@@ -946,7 +981,7 @@ class Auditer < Utilities
 			extensions = m.class_variable_get(:@@extensions)
 
 			unless extensions.empty?				
-				# Shows extensions report list.
+				# Show the extensions report list.
 				report_extensions(nil, extensions)
 
 				@@extensions_list.concat(extensions)
@@ -958,11 +993,11 @@ class Auditer < Utilities
 		}
 	end
 
-	# Organizes file contents in array.
+	# Organize the file contents in array.
 	def _organize_file_contents(filename, what)
 		tmp = []
 
-		# Gets password list.
+		# Get the password list.
 		if File.exist?(LISTS_PATH + filename)
 			begin
 				if File.open(LISTS_PATH + filename).each { |line| 
@@ -984,54 +1019,54 @@ class Auditer < Utilities
 		return tmp
 	end
 
-	# Sets dump global variables.
+	# Set the dump global variables.
 	def _set_dump
 		# Checks for dumphex option.
 		if ENV.key?(ENV_PREFIX + 'DUMPHEX')
 			@@dump_hex = ENV.fetch(ENV_PREFIX + 'DUMPHEX')
 		end
 
-		# Checks for dumpclean option.
+		# Check for the dumpclean option.
 		if ENV.key?(ENV_PREFIX + 'DUMPCLEAN')
 			@@dump_clean = ENV.fetch(ENV_PREFIX + 'DUMPCLEAN')
 		end
 	end
 
-	# Sets threads limit global variable.
+	# Set the threads limit global variable.
 	def _set_threads_limit
-		# Checks for timeout option.
+		# Check for the timeout option.
 		if ENV.key?(ENV_PREFIX + 'THREADS')
 			@@threads_limit = ENV.fetch(ENV_PREFIX + 'THREADS').to_i
 		end
 	end
 
-	# Sets timeout global variable.
+	# Set the timeout global variable.
 	def _set_timeout
-		# Checks for timeout option.
+		# Check for the timeout option.
 		if ENV.key?(ENV_PREFIX + 'TIMEOUT')
 			@@timeout = ENV.fetch(ENV_PREFIX + 'TIMEOUT').to_f
 		end
 	end
 
-	# Sets interface global variable.
+	# Set the interface global variable.
 	def _set_iface
-		# Checks for network interface.
+		# Check for the network interface.
 		if ENV.key?(ENV_PREFIX + 'IFACE')
 			@@interface = ENV.fetch(ENV_PREFIX + 'IFACE')
 		end
 	end
 
-	# Sets transport global variable.
+	# Set the transport global variable.
 	def _set_transport
-		# Checks and parses the transport.
+		# Check and parse the transport.
 		if ENV.key?(ENV_PREFIX + 'TRANSPORT')
 			@@transport = ENV.fetch(ENV_PREFIX + 'TRANSPORT').downcase
 		end
 	end
 
-	# Sets ports global variables.
+	# Set the ports global variables.
 	def _set_ports
-		# Checks and parses the port scan range.
+		# Check and parses the port scan range.
 		if ENV.key?(ENV_PREFIX + 'PORT')
 			ports = ENV.fetch(ENV_PREFIX + 'PORT')
 			if ports.include?('-')
@@ -1046,7 +1081,7 @@ class Auditer < Utilities
 		end
 	end
 
-	# Sets a barkeley packet filter.
+	# Set a barkeley packet filter.
 	def _set_bp_filter(descriptor, filter)
 		begin
 			descriptor.setfilter(filter)
