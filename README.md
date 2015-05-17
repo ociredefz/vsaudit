@@ -30,36 +30,36 @@ Now you can start vsaudit with:
 Environment commands
 --------------------
 
-    - Display the available options that can be set
-    - List the environment variables
-    - Get the value of environment variable
-    - Set or change the environment variables
+- Display the available options that can be set
+- List the environment variables
+- Get the value of environment variable
+- Set or change the environment variables
 
 
 Audit commands
 --------------
 
-    - Check mistakes in the local configuration files
-    - Scan a local o remote network
-    - Enumerate the extensions
-    - Bruteforce extensions
-    - Get the live network traffic
-    - Intercept the network traffic by custom bpf
+- Check mistakes in the local configuration files
+- Scan a local o remote network
+- Enumerate the extensions
+- Bruteforce extensions
+- Get the live network traffic
+- Intercept the network traffic by custom bpf
 
 
 Informations commands
 ---------------------
 
-    - Get informations about modules or address
-    - Show the report list
-    - Show the extensions list
+- Get informations about modules or address
+- Show the report list
+- Show the extensions list
 
 
 Global commands
 ---------------
 
-    - Display the help message
-    - Quit from the framework
+- Display the help message
+- Quit from the framework
 
 
 Screenshots
