@@ -1,6 +1,24 @@
 CHANGELOG VSAUDIT - 2015.2
 ==========================
 
+2015.RC4 - 27-05-2015
+
+    Added:
+
+        * Replace sox-library wrapper with original sox command.
+        * Example RAW stream file to test the sox decoder.
+
+
+    Removed:
+
+        * Sox library wrapper.
+
+
+    Fixes:
+
+        * Some debug commands.
+
+
 2015.RC3 - 17-05-2015
 
     Added:

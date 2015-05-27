@@ -578,12 +578,17 @@ Informations commands:
 
             + Use session [session_id] to attach to process
 
+
     - Decode on-the-fly the raw data-file
 
         This command decodes on-the-fly the raw data stream that is stored in a file with sox library.
         It's useful to listen the voice-call in realtime.
 
             vsaudit > decode [raw-file]
+
+            vsaudit > ls raw
+            example.raw
+            vsaudit > decode example.raw
 
 
 Global commands:

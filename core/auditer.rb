@@ -1,17 +1,23 @@
 #!/usr/bin/env ruby
 #
 # auditer.rb - voip auditing framework.
-# Copyright (c) 2015 Sanvil Security.
+#
+# Sanvil Security <security@sanvil.net>
+# (c) 2015 - MIT License.
 #
 
 require 'pcaprub'
 require 'digest'
 require 'ipaddr'
 require 'date'
-require 'ruby-sox'
 
-PCAP_PACKET_SIZE    = 65535
+BASH_PATH           = '/bin/bash'
+RAW_PATH            =  Dir.pwd + '/raw/'
+LISTS_PATH          =  Dir.pwd + '/list/'
+
 PCAP_RAW_FILE       = 'data.raw'
+PCAP_WAV_FILE       = 'data.wav'
+PCAP_PACKET_SIZE    =  65535
 
 class Auditer < Utilities
     protected
@@ -89,11 +95,11 @@ class Auditer < Utilities
                     }
                     end
                 rescue Exception
-                    puts "\t#{RB}#{RB}- error:#{RST}#{RST} #{RB}file doesn't exists!#{RST}\n\n"
+                    puts "\t#{RB}- error:#{RST}file doesn't exists#{RST}\n\n"
                     found = false
                 ensure
                     if found == 0
-                        puts "\t#{GB}+ file seems to be okay!#{RST}\n\n"
+                        puts "\t#{GB}+ file seems to be okay#{RST}\n\n"
                     end
                 end
             }
@@ -589,7 +595,14 @@ class Auditer < Utilities
 
         unless command.empty?
             arguments  = command.take(1)
+            ret = _return_sox(arguments.first)
 
+            if ret === false
+                return puts "#{RB}- error:#{RST} sox is not installed?#{RST}" 
+            elsif ret === true
+                basename = File.basename(RAW_PATH + arguments.first, '.raw')
+                puts "#{GB}- #{RST}decode: #{GB}%s#{RST} file have been decoded into: #{GB}raw/%s.wav#{RST}" % [arguments.first, basename]
+            end
         end
     end
 
@@ -881,7 +894,7 @@ class Auditer < Utilities
 
                     # Write the raw stream data to file (byte-to-byte).
                     if custom.include?('record')
-                        File.open(TEMP_PATH + PCAP_RAW_FILE, 'ab') { |f|
+                        File.open(RAW_PATH + PCAP_RAW_FILE, 'ab') { |f|
                             line.each_byte { |b| f << b.chr }
                         }
                     end
@@ -1091,5 +1104,14 @@ class Auditer < Utilities
         end
 
         return false
+    end
+
+    # Test if sox command exists.
+    def _return_sox(filename)
+        if File.exist?(RAW_PATH + filename)
+            return system("#{BASH_PATH} -c 'sox -r8000 -c1 -t ul #{RAW_PATH}#{filename} -t wav #{RAW_PATH}`basename #{filename} .raw`.wav &> /dev/null'")
+        else
+            return puts "#{RB}- error:#{RST} #{RAW_PATH}#{filename} file doesn't exists"
+        end
     end
 end

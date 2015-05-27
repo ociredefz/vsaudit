@@ -1,7 +1,7 @@
 vsaudit
 =======
 
-This is a opensource tool to perform attacks to general voip services It allows to scans the whole network or single host to do the gathering phase, then it is able to search for most known vulnerabilities on the founds alive hosts and try to exploit them.
+This is an opensource tool to perform attacks to general voip services It allows to scans the whole network or single host to do the gathering phase, then it is able to search for most known vulnerabilities on the founds alive hosts and try to exploit them.
 
 
 Install dependencies

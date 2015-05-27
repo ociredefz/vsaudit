@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 #
 # environment.rb - voip auditing framework.
-# Copyright (c) 2015 Sanvil Security.
+#
+# Sanvil Security <security@sanvil.net>
+# (c) 2015 - MIT License.
 #
 
 require Dir.pwd << '/core/utilities'

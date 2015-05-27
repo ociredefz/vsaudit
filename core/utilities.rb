@@ -1,20 +1,12 @@
 #!/usr/bin/env ruby
 #
 # utilities.rb - voip auditing framework.
-# Copyright (c) 2015 Sanvil Security.
+#
+# Sanvil Security <security@sanvil.net>
+# (c) 2015 - MIT License.
 #
 
-require 'tempfile'
-
-LISTS_PATH  = Dir.pwd + '/list/'
-TEMP_PATH   = Dir.pwd + '/raw/'
-
 class Utilities
-    protected
-
-    @@tempfile = nil
-    @@tempfile_name = nil
-
     public
 
     # Load the custom modules.
@@ -237,9 +229,9 @@ class Utilities
             puts "\n #{GB}+ ENVIRONMENT COMMANDS:#{RST}"
             puts "  \n"
             puts "  #{RB}Command\t\tArgs\t\t\tDescription#{RST}"
-            puts "  s|set\t\t[key] [value]\t\tSet an environment variable"
-            puts "  g|get\t\t[key]\t\t\tGet an environment variable value/s"
-            puts "  e|env\t\t-\t\t\tDisplay all environment variables"
+            puts "  s|set\t\t\t[key] [value]\t\tSet an environment variable"
+            puts "  g|get\t\t\t[key]\t\t\tGet an environment variable value/s"
+            puts "  e|env\t\t\t-\t\t\tDisplay all environment variables"
             puts "  \n"
             disp = true
         end
@@ -248,15 +240,15 @@ class Utilities
             puts "\n #{GB}+ ENVIRONMENT VARIABLES:#{RST}"
             puts "  \n"
             puts "  #{RB}Option\t\tValue\t\t\tDescription#{RST}"
-            puts "  PORT\t\t[*r|5060]\t\tSet port range (default: 5060)"
+            puts "  PORT\t\t\t[*r|5060]\t\tSet port range (default: 5060)"
             puts "  TIMEOUT\t\t[1|0.5]\t\t\tSet scanner timeout connect()/recv() (default: 1 seconds)"
             puts "  THREADS\t\t[1|200]\t\t\tSet scanner threads limit (default: 50 concurrency)"
-            puts "  TRANSPORT\t[udp|tcp]\t\tSet transport for enumeration/bruteforce (default: udp)"
-            puts "  IFACE\t\t[eth0|wlan1]\t\tIndicate which interface use to capture network traffic (default: eth0)"
+            puts "  TRANSPORT\t\t[udp|tcp]\t\tSet transport for enumeration/bruteforce (default: udp)"
+            puts "  IFACE\t\t\t[eth0|wlan1]\t\tIndicate which interface use to capture network traffic (default: eth0)"
             puts "  DUMPHEX\t\t[on|off]\t\tDump network traffic in hexadecimal (default: off)"
-            puts "  DUMPCLEAN\t[on|off]\t\tClear network traffic skipping unicode frame bytes (default: on)"
+            puts "  DUMPCLEAN\t\t[on|off]\t\tClear network traffic skipping unicode frame bytes (default: on)"
             puts "  \n"
-            puts "  * #{GB}r: range\t#{RST}ex. '0-65535'"
+            puts "  * #{GB}r: range\t\t#{RST}ex. '0-65535'"
             puts "  \n"
             disp = true
         end
@@ -265,14 +257,14 @@ class Utilities
             puts "\n #{GB}+ AUDIT COMMANDS:#{RST}"
             puts "  \n"
             puts "  #{RB}Command\t\tArgs\t\t\tDescription#{RST}"
-            puts "  f|fcheck\t-\t\t\tCheck for common configurations mistakes"
+            puts "  f|fcheck\t\t-\t\t\tCheck for common configurations mistakes"
             puts "  sn|scan\t\t[addr[/24]]\t\tStart information gathering scanner"
             puts "  en|enum\t\t[*r|*e] [addr]\t\tEnumerate/Test sip extensions (accounts)"
-            puts "  bf|bruteforce\t[*r|*e] [*p] [addr]\tTry to bruteforce sip extension(s)"
+            puts "  bf|bruteforce\t\t[*r|*e] [*p] [addr]\tTry to bruteforce sip extension(s)"
             puts "  \n"
-            puts "  * #{GB}r: range\t#{RST}ex. 0500-6000"
-            puts "  * #{GB}e: ext-file\t#{RST}ex. 'ext-list'"
-            puts "  * #{GB}p: psw-file\t#{RST}ex. 'psw-list'"
+            puts "  * #{GB}r: range\t\t#{RST}ex. 0500-6000"
+            puts "  * #{GB}e: ext-file\t\t#{RST}ex. 'ext-list'"
+            puts "  * #{GB}p: psw-file\t\t#{RST}ex. 'psw-list'"
             puts "  \n"
             disp = true
         end
@@ -281,10 +273,10 @@ class Utilities
             puts "\n #{GB}+ PCAP BASE FILTERS:#{RST}"
             puts "  \n"
             puts "  #{RB}Filter\t\t\t\t\tDescription#{RST}"
-            puts "  udp dst port 5060\t\t\tIntercept destination udp traffic to destination port 5060"
-            puts "  tcp port 5060\t\t\t\tIntercept source and destination tcp traffic from source port 5060"
-            puts "  ip host 192.168.1.100\t\t\tIntercept source and destination both udp/tcp traffic"
-            puts "  password\t\t\t\tIntercept the sip md5 challenge response hash (WWW-Authenticate)"
+            puts "  udp dst port 5060\t\t\t\tIntercept destination udp traffic to destination port 5060"
+            puts "  tcp port 5060\t\t\t\t\tIntercept source and destination tcp traffic from source port 5060"
+            puts "  ip host 192.168.1.100\t\t\t\tIntercept source and destination both udp/tcp traffic"
+            puts "  password\t\t\t\t\tIntercept the sip md5 challenge response hash (WWW-Authenticate)"
             puts "  \n"
             disp = true
         end
@@ -294,12 +286,12 @@ class Utilities
             puts "  \n"
             puts "  #{RB}Command\t\tArgs\t\t\tDescription#{RST}"
             puts "  i|info\t\t[module|addr]\t\tReturn informations about module or address in report list"
-            puts "  r|report\t-\t\t\tShow scanner report with grouped trasports data"
+            puts "  r|report\t\t-\t\t\tShow scanner report with grouped trasports data"
             puts "  ex|exts\t\t-\t\t\tShow extensions enumeration report"
-            puts "  se|session\t[list|session_id]\tShow extensions enumeration report"
+            puts "  se|session\t\t[list|session_id]\tShow extensions enumeration report"
             puts "  lv|live\t\t[addr]\t\t\tGet all or filtered live network traffic data"
-            puts "  in|intercept\t[pcap-filter]\t\tFilter network traffic using pcap filters (live extended)"
-            puts "  dc|decode\t[raw-file]\t\tDecode on-the-fly raw data-file stream (listen the voice-call)"
+            puts "  in|intercept\t\t[pcap-filter]\t\tFilter network traffic using pcap filters (live extended)"
+            puts "  dc|decode\t\t[raw-file]\t\tDecode on-the-fly raw data-file stream (listen the voice-call)"
             puts "  \n"
             puts "  #{GB}* #{RST}decode: this function is currently in development - do not use it."
             puts "  #{GB}* #{RST}intercept: append option '#{GB}detach#{RST}' to sessionize action"
@@ -312,9 +304,9 @@ class Utilities
             puts "\n #{GB}+ GLOBAL COMMANDS:#{RST}"
             puts "  \n"
             puts "  #{RB}Command\t\tArgs\t\t\tDescription#{RST}"
-            puts "  q|quit|exit\t-\t\t\tExit"
+            puts "  q|quit|exit\t\t-\t\t\tExit"
             puts "  h|help\t\t[what]\t\t\tDisplay this or filtered message"
-            puts "\t\t\t\t\t\tdescription | environment | audit | filters | informations | global\n\n"
+            puts "\t\t\t\t\t\tdescription | environment | audit | filters | informations | global\n"
             disp = true
         end
 
