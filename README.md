@@ -74,8 +74,8 @@ Screenshots
 ![vsaudit - intercept](https://raw.githubusercontent.com/sanvil/vsaudit/master/screens/preview-4.png)
 
 
-Links
------
+Reference
+---------
 
-* User's Manual: http://deftcode.ninja/post/vsaudit-voip-security-audit-framework
-* Creators: http://sanvil.net
+* Manual: http://deftcode.ninja/post/vsaudit-voip-security-audit-framework
+* RFC-3261 (SIP - Session Initiation Protocol): https://www.ietf.org/rfc/rfc3261.txt
