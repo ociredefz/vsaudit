@@ -19,7 +19,7 @@ PCAP_RAW_FILE       = 'data.raw'
 PCAP_WAV_FILE       = 'data.wav'
 PCAP_PACKET_SIZE    =  65535
 
-class Auditer < Utilities
+class Auditer < Utility
     protected
 
     # Network interface.

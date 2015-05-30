@@ -10,7 +10,7 @@
  'resolv',
   Dir.pwd + '/core/environment', 
   Dir.pwd + '/core/auditer',
-  Dir.pwd + '/core/utilities'].each(&method(:require))
+  Dir.pwd + '/core/utility'].each(&method(:require))
 
 # TAB Completion.
 LIST = ['set', 'get', 'env', 
@@ -22,7 +22,7 @@ LIST = ['set', 'get', 'env',
 # Instance the base app objects.
 $environ    = Environment.new
 $auditer    = Auditer.new
-$utility    = Utilities.new
+$utility    = Utility.new
 
 # Custom modules instances.
 $modules    = []

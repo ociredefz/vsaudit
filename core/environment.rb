@@ -6,7 +6,7 @@
 # (c) 2015 - MIT License.
 #
 
-require Dir.pwd << '/core/utilities'
+require Dir.pwd << '/core/utility'
 
 VERSION         = '2015.2'
 ENV_PREFIX      = 'VS__'
@@ -28,7 +28,7 @@ PB  = "\e[1;35m"
 CL  = "\e[36m"
 CB  = "\e[1;36m"
 
-class Environment < Utilities
+class Environment < Utility
     protected
 
     # Available environment options list,
