@@ -8,7 +8,7 @@
 
 require Dir.pwd << '/core/utility'
 
-VERSION         = '2015.2'
+VERSION         = '2015-RC4'
 ENV_PREFIX      = 'VS__'
 
 # BASH-LIKE colors.
