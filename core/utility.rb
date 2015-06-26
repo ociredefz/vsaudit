@@ -322,12 +322,6 @@ class Utility
     def _get_device_info(name)
         found = 0
 
-        begin
-            name = Resolv.getaddress(name)
-        rescue Exception
-            return 0
-        end
-
         $auditer::report_list.each { |r|
             if r.first[:service_address] == name then found += 1
                 puts "\n Address '#{GB}%s#{RST}' found:\n\n" \
