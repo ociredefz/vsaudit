@@ -67,13 +67,13 @@ Global commands
 Screenshots
 -----------
 
-![vsaudit - scanner](https://raw.githubusercontent.com/sanvil/vsaudit/master/screens/preview-1.png)
+![vsaudit - scanner](https://raw.githubusercontent.com/orgdeftcode/vsaudit/master/screens/preview-1.png)
 
-![vsaudit - enumeration](https://raw.githubusercontent.com/sanvil/vsaudit/master/screens/preview-2.png)
+![vsaudit - enumeration](https://raw.githubusercontent.com/orgdeftcode/vsaudit/master/screens/preview-2.png)
 
-![vsaudit - bruteforce](https://raw.githubusercontent.com/sanvil/vsaudit/master/screens/preview-3.png)
+![vsaudit - bruteforce](https://raw.githubusercontent.com/orgdeftcode/vsaudit/master/screens/preview-3.png)
 
-![vsaudit - intercept](https://raw.githubusercontent.com/sanvil/vsaudit/master/screens/preview-4.png)
+![vsaudit - intercept](https://raw.githubusercontent.com/orgdeftcode/vsaudit/master/screens/preview-4.png)
 
 
 Reference

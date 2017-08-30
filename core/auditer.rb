@@ -2,8 +2,8 @@
 #
 # auditer.rb - voip auditing framework.
 #
-# Sanvil Security <security@sanvil.net>
-# (c) 2015 - MIT License.
+# Federico Fazzi <eurialo@deftcode.ninja>
+# (c) 2017 - MIT License.
 #
 
 require 'pcaprub'
