@@ -26,7 +26,7 @@ Now you can start vsaudit with:
 
     deftcode vsaudit $ ruby vsaudit.rb
 
-NOTE: If you get an error with gem, you need to install the libssl-dev package (kali-linux: apt install libssl-dev).
+NOTE: If you get an error with gem, you need to install the ruby-dev and libssl-dev packages (kali-linux: apt install ruby-dev libssl-dev).
 
 
 Environment commands
